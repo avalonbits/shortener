@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS ShortLong(
+    Short TEXT NOT NULL,
+    Longn TEXT NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS short_idx ON ShortLong(Short);
