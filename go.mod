@@ -1,4 +1,4 @@
-module github.com/avalonbits/shortner
+module github.com/avalonbits/shortener
 
 go 1.19
 

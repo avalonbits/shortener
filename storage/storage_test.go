@@ -2,10 +2,9 @@ package storage_test
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 
-	"github.com/avalonbits/shortner/storage"
+	"github.com/avalonbits/shortener/storage"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -32,7 +31,7 @@ func TestRepo(t *testing.T) {
 			short: "very-long-name", long: "something", hasErr: false},
 	}
 
-	queries := storage.New(testDB())
+	queries := storage.New(storage.TestDB())
 
 	for _, tt := range createTestCases {
 		err := queries.SetShort(context.Background(), storage.SetShortParams{
@@ -78,16 +77,4 @@ func TestRepo(t *testing.T) {
 		}
 	}
 
-}
-
-func testDB() *sql.DB {
-	db, err := sql.Open("sqlite3", ":memory:")
-	if err != nil {
-		panic(err)
-
-	}
-	if _, err := db.Exec(storage.Schema); err != nil {
-		panic(err)
-	}
-	return db
 }
