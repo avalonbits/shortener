@@ -68,14 +68,6 @@ func TestShortNameErrors(t *testing.T) {
 	)
 	ctx := context.Background()
 
-	_, err := srv.ShortNameFor(ctx, "")
-	if err == nil {
-		t.Errorf("expected error for empty long, got no error")
-	}
-	if !errors.Is(err, service.ErrEmptyString) {
-		t.Errorf("expected empty string error, got %v", err)
-	}
-
 	for i := 0; i < 2; i++ {
 		short, err := srv.ShortNameFor(ctx, "this-is-a-test-long-name")
 		if err != nil {
@@ -86,13 +78,50 @@ func TestShortNameErrors(t *testing.T) {
 		}
 	}
 
-	_, err = srv.ShortNameFor(ctx, "this-will-be-an-error")
+	_, err := srv.ShortNameFor(ctx, "this-will-be-an-error")
 	if err == nil {
 		t.Errorf("expected an error, got no error.")
 	}
 	if !errors.Is(err, service.ErrExists) {
 		t.Errorf("expected a database error, got %v", err)
 	}
+}
+func TestValidate(t *testing.T) {
+	srv := service.NewShortener(
+		storage.New(storage.TestDB()),
+		crand.Reader,
+		1000, /*existsRetry=*/
+	)
+	ctx := context.Background()
+
+	_, err := srv.ShortNameFor(ctx, "")
+	if err == nil {
+		t.Errorf("expected error for empty long, got no error")
+	}
+	if !errors.Is(err, service.ErrEmptyString) {
+		t.Errorf("expected empty string error, got %v", err)
+	}
+
+	tooLong := randomString(8193)
+	_, err = srv.ShortNameFor(ctx, tooLong)
+	if !errors.Is(err, service.ErrTooLong) {
+		t.Errorf("expoected %v, got %v", service.ErrTooLong, err)
+	}
+
+	justRight := tooLong[:len(tooLong)-1]
+	_, err = srv.ShortNameFor(ctx, justRight)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+}
+
+func randomString(length int) string {
+	b := make([]byte, length)
+	const charset = "abcdefghijklmnopqrstuvqwxyz1234567890"
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
 }
 
 func TestLongFrom(t *testing.T) {
