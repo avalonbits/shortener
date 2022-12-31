@@ -43,18 +43,14 @@ var (
 	ErrExists        = fmt.Errorf("short name already exists")
 	ErrNotFound      = fmt.Errorf("short name not found")
 	ErrInvalidURL    = fmt.Errorf("invalid url")
+	ErrTooLong       = fmt.Errorf("URL is too long")
 )
 
 // ShortNameFor stores and returns a short name for the given long string.
 func (s *Shortener) ShortNameFor(ctx context.Context, long string) (string, error) {
-	long = strings.TrimSpace(long)
-	if long == "" {
-		return "", ErrEmptyString
-	}
-
 	long, err := s.Validate(long)
 	if err != nil {
-		return "", fmt.Errorf("%w: %v", ErrInvalidURL, err)
+		return "", err
 	}
 
 	var short string
@@ -89,6 +85,16 @@ func (s *Shortener) ShortNameFor(ctx context.Context, long string) (string, erro
 
 // Validate checks if the long string is a safe URL that we can store.
 func (s *Shortener) Validate(long string) (string, error) {
+	long = strings.TrimSpace(long)
+	if long == "" {
+		return "", ErrEmptyString
+	}
+
+	const urlLength = 8 * 1024
+	if len(long) > urlLength {
+		return "", ErrTooLong
+	}
+
 	// TODO(icc): implement URL validation.
 	return long, nil
 }
