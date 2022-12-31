@@ -156,16 +156,25 @@ func TestLongFrom(t *testing.T) {
 	}
 }
 
-func TestLongFromNotFound(t *testing.T) {
+func TestLongFromErrors(t *testing.T) {
 	srv := service.NewShortener(storage.New(storage.TestDB()), crand.Reader, 1 /*existsRetry=*/)
 	ctx := context.Background()
-	_, err := srv.LongFrom(ctx, "non-existing-short")
+	_, err := srv.LongFrom(ctx, "notfound")
 	if err == nil {
 		t.Errorf("expected an error, got no error.")
 	}
 	if !errors.Is(err, service.ErrNotFound) {
 		t.Errorf("expected not found error, got %v", err)
 	}
+
+	_, err = srv.LongFrom(ctx, "too-long-short-name")
+	if err == nil {
+		t.Errorf("expected an error, got no error")
+	}
+	if !errors.Is(err, service.ErrShortName) {
+		t.Errorf("expected %v, got %v", service.ErrShortName, err)
+	}
+
 }
 
 var globalShort string

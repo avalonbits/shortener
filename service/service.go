@@ -103,6 +103,7 @@ func (s *Shortener) Validate(long string) (string, error) {
 func (s *Shortener) LongFrom(ctx context.Context, short string) (string, error) {
 	short = strings.TrimSpace(short)
 	if len(short) != 8 {
+		return "", ErrShortName
 	}
 
 	long, err := s.queries.GetLong(ctx, short)
