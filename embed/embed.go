@@ -5,21 +5,9 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/fs"
 
 	echo "github.com/labstack/echo/v4"
 )
-
-//go:embed static/*
-var static embed.FS
-
-func Static() fs.FS {
-	staticFS, err := fs.Sub(static, "static")
-	if err != nil {
-		panic(err)
-	}
-	return staticFS
-}
 
 //go:embed *.tmpl
 var templateFiles embed.FS

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	_ "embed"
 	"errors"
+	"strings"
 
 	"github.com/mattn/go-sqlite3"
 )
@@ -14,7 +15,19 @@ var Schema string
 
 // TestDB returns an in-memory sqlite3 database.
 func TestDB() *sql.DB {
-	db, err := sql.Open("sqlite3", ":memory:")
+	return openDB(":memory:")
+}
+
+// ProdDB returns an on-disk database.
+func ProdDB(path string) *sql.DB {
+	if strings.Index(path, ":memory:") != -1 {
+		panic("for in-memory databases, use TestDB")
+	}
+	return openDB(path)
+}
+
+func openDB(path string) *sql.DB {
+	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		panic(err)
 

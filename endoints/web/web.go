@@ -1,6 +1,8 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/avalonbits/shortener/service"
 	"github.com/labstack/echo/v4"
 )
@@ -16,5 +18,5 @@ func New(svc *service.Shortener) *Handlers {
 }
 
 func (h *Handlers) Root(c echo.Context) error {
-	return nil
+	return c.Render(http.StatusOK, "root", nil)
 }
