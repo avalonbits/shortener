@@ -48,10 +48,12 @@ func setup() (*echo.Echo, string, string) {
 	templates := embed.Templates()
 	e.Renderer = templates
 	handlers := web.New(
-		service.NewShortener(queries, rand.Reader, 2),
+		service.NewShortener(queries, rand.Reader, 2 /*existsRetry=*/),
+		"localhost:9001",
 	)
 	templates.NewView("root", "root.tmpl")
 	e.GET("/", handlers.Root)
+	e.POST("/short", handlers.CreateShortURL)
 
 	return e, "localhost", "9001"
 }
