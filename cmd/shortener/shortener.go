@@ -53,6 +53,9 @@ func setup() (*echo.Echo, string, string) {
 	)
 	templates.NewView("root", "root.tmpl")
 	e.GET("/", handlers.Root)
+
+	templates.NewView("short_url", "short_url.tmpl")
+	e.GET("/:short", handlers.ResolveShortURL)
 	e.POST("/short", handlers.CreateShortURL)
 
 	return e, "localhost", "9001"

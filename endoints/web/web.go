@@ -49,11 +49,7 @@ func (h *Handlers) Root(c echo.Context) error {
 }
 
 type urlParam struct {
-	FormURL string `form:"url"`
-}
-
-type urlResponse struct {
-	URL string `json:"url"`
+	LongURL string `form:"longurl"`
 }
 
 func (h *Handlers) CreateShortURL(c echo.Context) error {
@@ -62,15 +58,32 @@ func (h *Handlers) CreateShortURL(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "invalid url")
 	}
 
-	if input.FormURL == "" {
+	if input.LongURL == "" {
 		return c.String(http.StatusBadRequest, "missing an url")
 	}
+	if !strings.HasPrefix(input.LongURL, "https://") && !strings.HasPrefix(input.LongURL, "http://") {
+		input.LongURL = "http://" + input.LongURL
+	}
 
-	short, err := h.svc.ShortNameFor(c.Request().Context(), input.FormURL)
+	short, err := h.svc.ShortNameFor(c.Request().Context(), input.LongURL)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	shortURL := h.dom.URL(short)
 	return c.Render(http.StatusOK, "short_url", map[string]string{"ShortURL": shortURL})
+}
+
+func (h *Handlers) ResolveShortURL(c echo.Context) error {
+	short := c.Param("short")
+	if short == "" {
+		return h.Root(c)
+	}
+
+	longURL, err := h.svc.LongFrom(c.Request().Context(), short)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.Redirect(http.StatusTemporaryRedirect, longURL)
 }
